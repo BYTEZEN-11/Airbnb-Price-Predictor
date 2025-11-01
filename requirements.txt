@@ -1,0 +1,22 @@
+numpy
+pandas
+scikit-learn
+flask
+joblib
+catboost
+xgboost
+seaborn
+dvc
+gunicorn
+
+# Optional — Bundle 1.1 (Optuna + MLflow hyperparameter search)
+optuna
+mlflow
+
+# Optional — Bundle 4 (production hardening)
+prometheus-flask-exporter
+python-json-logger
+flask-limiter
+
+# Test deps
+pytest
