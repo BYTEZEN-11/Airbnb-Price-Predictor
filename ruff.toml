@@ -1,0 +1,47 @@
+# Ruff lint configuration.
+#
+# CI runs `ruff check src/` against whatever version is current on PyPI,
+# so this config pins our project's house style. We start from the default
+# rule set and then explicitly disable rules that don't fit this codebase.
+
+# Match Python 3.10+ as declared in setup.py.
+target-version = "py310"
+
+# The dataset's column-name lists (PROPERTY_TYPE_CAT, BOOLEAN_CAT, etc.) are
+# intentionally readable as a single horizontal line — they document the
+# categorical vocabulary in one place. Same for the long logging.info()
+# previews and the np.concatenate()s that build train_arr / test_arr.
+# We pick 140 to leave room for these without forcing artificial wrapping.
+line-length = 140
+
+# src-layout: package lives under src/. ruff needs to know that so
+# N999 (invalid module name) can be applied sensibly.
+src = ["src", "tests"]
+
+# Experimental Jupyter notebooks aren't shipped with the app; they're
+# scratch/exploration code where import ordering is irrelevant. Excluded
+# from CI lint scope.
+extend-exclude = ["Notebook_Experiments"]
+
+[lint]
+# BLE001 — "Do not catch blind exception: `Exception`"
+#
+# Several entry-point wrappers and confidence-band fallbacks in this
+# project deliberately catch `Exception` because the cost of missing one
+# (silent failure → wrong prediction served to user) is higher than the
+# cost of over-catching. Specific exception types would just add try/except
+# nesting without changing behavior. Disabled project-wide.
+
+# N999 — "Invalid module name"
+#
+# ruff's default here expects snake_case for module names. This project
+# ships `Training_pipeline.py`, `Data_ingestion.py`, `Model_trainer.py`,
+# `HyperparameterTuner.py`, etc. (PascalCase matches the class names
+# inside those modules). Renaming every file would break every importer
+# across the codebase. Disabled project-wide.
+
+# Add the import sort rule (I001) to the default selection.
+select = ["E", "F", "I", "W"]
+
+# Apply the disabled rules to every file.
+ignore = ["BLE001", "N999"]
