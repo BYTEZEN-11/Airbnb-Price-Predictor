@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+    <title>Error - Airbnb Price Predictor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚫 Oops! Something went wrong</h1>
+            <p>We encountered an error while processing your request</p>
+        </div>
+
+        <div class="main-card">
+            <div class="card-header" style="background: linear-gradient(135deg, #ff6b6b, #ee5a52);">
+                <h2>🔧 Technical Error</h2>
+                <p class="subtitle">Don't worry, our team is working to fix this</p>
+            </div>
+
+            <div class="form-container">
+                <div class="feature-highlight" style="background: linear-gradient(135deg, #ffe8e8, #ffcccc); border-color: #ff6b6b;">
+                    <h4>❗ Error Details</h4>
+                    <p><strong>What happened:</strong> {{ error_message }}</p>
+                </div>
+
+                <div class="feature-highlight">
+                    <h4>💡 What you can do</h4>
+                    <p>
+                        • Check that all required fields are filled in correctly<br>
+                        • Make sure numeric values are within the specified ranges<br>
+                        • Try refreshing the page and submitting again<br>
+                        • If the problem persists, please contact our support team
+                    </p>
+                </div>
+
+                <div class="btn-container">
+                    <a href="{{ url_for('home') }}" class="btn-predict" style="text-decoration: none; display: inline-block;">
+                        🏠 Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-redirect after 10 seconds
+        setTimeout(() => {
+            if (confirm('Would you like to go back to the main page?')) {
+                window.location.href = "{{ url_for('home') }}";
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
