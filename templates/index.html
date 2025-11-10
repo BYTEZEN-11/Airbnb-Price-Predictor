@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+    <title>Airbnb Price Predictor - Smart Pricing for Your Property</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+    <!-- Leaflet (Bundle 3.2) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <!-- Font Awesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Google Fonts for modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Additional JavaScript for enhanced interactivity -->
+    <script src="{{url_for('static', filename='app.js')}}" defer></script>
+</head>
+<body>
+    <!-- Background particles animation -->
+    <div class="particles-bg">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <div class="container">
+        <!-- Enhanced header with floating elements -->
+        <div class="header">
+            <div class="header-decoration">
+                <i class="fas fa-home floating-icon"></i>
+                <i class="fas fa-chart-line floating-icon"></i>
+                <i class="fas fa-location-dot floating-icon"></i>
+            </div>
+            <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+                <i class="fas fa-moon"></i>
+                <span>Dark</span>
+            </button>
+            <h1 class="main-title">
+                <i class="fas fa-home"></i>
+                Airbnb Price Predictor
+            </h1>
+            <p class="main-subtitle">Get accurate pricing suggestions for your property using AI-powered analysis</p>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <i class="fas fa-brain"></i>
+                    <span>AI-Powered</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-bolt"></i>
+                    <span>Instant Results</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bundle 3.3 — saved-drafts banner -->
+        <div id="draft-banner" class="draft-banner">
+            <i class="fas fa-file-alt"></i>
+            <span>We found a saved draft from your last visit.</span>
+            <div class="draft-actions">
+                <button type="button" id="load-draft" class="btn-draft">
+                    <i class="fas fa-download"></i> Load draft
+                </button>
+                <button type="button" id="discard-draft" class="btn-draft btn-draft-danger">
+                    <i class="fas fa-trash"></i> Discard
+                </button>
+            </div>
+        </div>
+
+        <!-- Suggestions Sidebar -->
+        <div class="suggestions-sidebar" id="suggestions-sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Smart Tips</h3>
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="suggestions-content">
+                <!-- Property Information Tips -->
+                <div class="tip-section" data-section="property">
+                    <div class="tip-header">
+                        <i class="fas fa-building"></i>
+                        <h4>Property Tips</h4>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-star"></i>
+                        <div class="tip-text">
+                            <strong>Apartment vs House:</strong> Houses typically command 15-25% higher prices than apartments in the same area.
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div class="tip-text">
+                            <strong>Location Impact:</strong> NYC and SF properties average 40% higher than other cities.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Space & Amenities Tips -->
+                <div class="tip-section" data-section="space">
+                    <div class="tip-header">
+                        <i class="fas fa-bed"></i>
+                        <h4>Space Tips</h4>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-users"></i>
+                        <div class="tip-text">
+                            <strong>Guest Capacity:</strong> Properties accommodating 4+ guests earn 30% more per night.
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-list"></i>
+                        <div class="tip-text">
+                            <strong>Amenities Count:</strong> High-end properties average 25+ amenities. Consider WiFi, kitchen, parking, AC.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Policies Tips -->
+                <div class="tip-section" data-section="policies">
+                    <div class="tip-header">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h4>Policy Tips</h4>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-calendar-times"></i>
+                        <div class="tip-text">
+                            <strong>Cancellation:</strong> Flexible policies increase bookings by 20% but may reduce rates by 5-8%.
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-bolt"></i>
+                        <div class="tip-text">
+                            <strong>Instant Booking:</strong> Enables 25% more bookings and typically increases visibility in search.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Host Tips -->
+                <div class="tip-section" data-section="host">
+                    <div class="tip-header">
+                        <i class="fas fa-user-tie"></i>
+                        <h4>Host Tips</h4>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-camera"></i>
+                        <div class="tip-text">
+                            <strong>Profile Picture:</strong> Hosts with photos receive 40% more inquiries and build guest trust.
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-reply"></i>
+                        <div class="tip-text">
+                            <strong>Response Rate:</strong> Maintain 90%+ response rate to become a Superhost and earn 20% premium.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location & Reviews Tips -->
+                <div class="tip-section" data-section="location">
+                    <div class="tip-header">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <h4>Reviews Tips</h4>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-star"></i>
+                        <div class="tip-text">
+                            <strong>Review Score:</strong> Properties with 90+ scores command 15% price premium. Focus on cleanliness & communication.
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-comments"></i>
+                        <div class="tip-text">
+                            <strong>Review Count:</strong> Properties with 10+ reviews show 25% higher booking rates than new listings.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Insights -->
+                <div class="tip-section active">
+                    <div class="tip-header">
+                        <i class="fas fa-chart-trending-up"></i>
+                        <h4>Market Insights</h4>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-calendar"></i>
+                        <div class="tip-text">
+                            <strong>Seasonal Pricing:</strong> Summer rates typically 20-30% higher. Adjust for holidays and local events.
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-trophy"></i>
+                        <div class="tip-text">
+                            <strong>Top Features:</strong> Kitchen, WiFi, and free parking are the most requested amenities.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="pricing-insight">
+                    <i class="fas fa-brain"></i>
+                    <div class="insight-text">
+                        <strong>AI Insight:</strong> Our model analyzes 50+ factors to predict your optimal price range.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating suggestions button for mobile -->
+        <button class="suggestions-fab" onclick="toggleSidebar()" id="suggestions-fab">
+            <i class="fas fa-lightbulb"></i>
+            <span class="fab-tooltip">Get Smart Tips</span>
+        </button>
+
+        <div class="main-content-wrapper">
+            <div class="main-card">
+                <div class="card-header">
+                    <div class="card-header-content">
+                        <h2><i class="fas fa-edit"></i> Property Details</h2>
+                        <p class="subtitle">Fill in your property information to get an instant price estimate</p>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="form-progress"></div>
+                            </div>
+                            <span class="progress-text">0% Complete</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                <form action="{{url_for('home')}}" method="POST" enctype="multipart/form-data" id="prediction-form">
+                    <div class="form-grid">
+                        <div class="form-section" data-section="property">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <h3>Property Information</h3>
+                            </div>
+                            <div class="form-group">
+                                <label for="propertytype">
+                                    <i class="fas fa-home"></i>
+                                    Property Type
+                                </label>
+                                <div class="select-wrapper">
+                                    <select name="propertytype" id="propertytype" class="form-control" required>
+                                        <option value="">Select property type...</option>
+                                        <option value="Apartment">🏢 Apartment</option>
+                                        <option value="House">🏠 House</option>
+                                        <option value="Condominium">🏙️ Condominium</option>
+                                        <option value="Townhouse">🏘️ Townhouse</option>
+                                        <option value="Loft">🏭 Loft</option>
+                                        <option value="Bed & Breakfast">🛏️ Bed & Breakfast</option>
+                                        <option value="Boutique hotel">🏨 Boutique Hotel</option>
+                                        <option value="Bungalow">🏖️ Bungalow</option>
+                                        <option value="Villa">🏰 Villa</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="roomtype">
+                                    <i class="fas fa-door-closed"></i>
+                                    Room Type
+                                </label>
+                                <div class="select-wrapper">
+                                    <select name="roomtype" id="roomtype" class="form-control" required>
+                                        <option value="">Select room type...</option>
+                                        <option value="Entire home/apt">🏠 Entire Home/Apartment</option>
+                                        <option value="Private room">🚪 Private Room</option>
+                                        <option value="Shared room">👥 Shared Room</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="city">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    City
+                                </label>
+                                <div class="select-wrapper">
+                                    <select name="city" id="city" class="form-control" required>
+                                        <option value="">Select city...</option>
+                                        <option value="NYC">🗽 New York</option>
+                                        <option value="SF">🌉 San Francisco</option>
+                                        <option value="LA">🌴 Los Angeles</option>
+                                        <option value="Chicago">🏙️ Chicago</option>
+                                        <option value="Boston">🦞 Boston</option>
+                                        <option value="DC">🏛️ Washington, D.C.</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section" data-section="space">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-bed"></i>
+                                </div>
+                                <h3>Space & Amenities</h3>
+                            </div>
+                            <div class="form-group">
+                                <label for="accommodates">
+                                    <i class="fas fa-users"></i>
+                                    Maximum Guests
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="accommodates" id="accommodates" value="2" min="1" max="16" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bedrooms">
+                                    <i class="fas fa-bed"></i>
+                                    Bedrooms
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="bedrooms" id="bedrooms" value="1" min="0" max="10" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="beds">
+                                    <i class="fas fa-bed"></i>
+                                    Number of Beds
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="beds" id="beds" value="1" min="1" max="18" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bathrooms">
+                                    <i class="fas fa-bath"></i>
+                                    Bathrooms
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="bathrooms" id="bathrooms" value="1" min="0" max="8" step="0.5" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="amenties">
+                                    <i class="fas fa-list"></i>
+                                    Number of Amenities
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="amenties" id="amenties" value="10" min="1" max="50" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="bedtype">
+                                    <i class="fas fa-bed"></i>
+                                    Bed Type
+                                </label>
+                                <div class="select-wrapper">
+                                    <select name="bedtype" id="bedtype" class="form-control" required>
+                                        <option value="">Select bed type...</option>
+                                        <option value="Real Bed">🛏️ Real Bed</option>
+                                        <option value="Futon">🛋️ Futon</option>
+                                        <option value="Pull-out Sofa">🛋️ Pull-out Sofa</option>
+                                        <option value="Airbed">🏕️ Airbed</option>
+                                        <option value="Couch">🛋️ Couch</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section" data-section="policies">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <h3>Policies & Features</h3>
+                            </div>
+                            <div class="form-group">
+                                <label for="canceltype">
+                                    <i class="fas fa-calendar-times"></i>
+                                    Cancellation Policy
+                                </label>
+                                <div class="select-wrapper">
+                                    <select name="canceltype" id="canceltype" class="form-control" required>
+                                        <option value="">Select policy...</option>
+                                        <option value="Flexible">😊 Flexible</option>
+                                        <option value="Moderate">📋 Moderate</option>
+                                        <option value="Strict">❗ Strict</option>
+                                        <option value="Super strict">⚠️ Super Strict</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="clean">
+                                    <i class="fas fa-broom"></i>
+                                    Cleaning Fee
+                                </label>
+                                <div class="select-wrapper">
+                                    <select name="clean" id="clean" class="form-control" required>
+                                        <option value="">Select option...</option>
+                                        <option value="True">✅ Yes, I charge a cleaning fee</option>
+                                        <option value="False">❌ No cleaning fee</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="instbook">
+                                    <i class="fas fa-bolt"></i>
+                                    Instant Booking
+                                </label>
+                                <div class="select-wrapper">
+                                    <select name="instbook" id="instbook" class="form-control" required>
+                                        <option value="">Select option...</option>
+                                        <option value="t">⚡ Instant booking enabled</option>
+                                        <option value="f">📞 Requires approval</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section" data-section="host">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                                <h3>Host Information</h3>
+                            </div>
+                            <div class="form-group">
+                                <label for="dp">
+                                    <i class="fas fa-camera"></i>
+                                    Host Profile Picture
+                                </label>
+                                <div class="select-wrapper">
+                                    <select name="dp" id="dp" class="form-control" required>
+                                        <option value="">Select option...</option>
+                                        <option value="t">📸 Yes, I have a profile picture</option>
+                                        <option value="f">👤 No profile picture</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="verify">
+                                    <i class="fas fa-shield-check"></i>
+                                    Host Verification
+                                </label>
+                                <div class="select-wrapper">
+                                    <select name="verify" id="verify" class="form-control" required>
+                                        <option value="">Select option...</option>
+                                        <option value="t">✅ Verified host</option>
+                                        <option value="f">❌ Not verified</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="hostresponse">
+                                    <i class="fas fa-reply"></i>
+                                    Response Rate (%)
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="hostresponse" id="hostresponse" value="95" min="0" max="100" class="form-control" required>
+                                    <div class="input-addon">%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section" data-section="location">
+                            <div class="section-header">
+                                <div class="section-icon">
+                                    <i class="fas fa-map-marked-alt"></i>
+                                </div>
+                                <h3>Location & Reviews</h3>
+                            </div>
+                            <div class="form-group">
+                                <label for="lat">
+                                    <i class="fas fa-crosshairs"></i>
+                                    Latitude
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="lat" id="lat" value="40.7128" step="0.000001" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="long">
+                                    <i class="fas fa-crosshairs"></i>
+                                    Longitude
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="long" id="long" value="-74.0060" step="0.000001" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="review">
+                                    <i class="fas fa-comments"></i>
+                                    Number of Reviews
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="review" id="review" value="10" min="0" max="1000" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="overallreview">
+                                    <i class="fas fa-star"></i>
+                                    Review Score (0-100)
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" name="overallreview" id="overallreview" value="85" min="0" max="100" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <!-- Bundle 3.2 — Enhanced Map widget -->
+                            <div class="map-container">
+                                <label><i class="fas fa-map"></i> Interactive Location Map</label>
+                                <div id="map" class="interactive-map"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Bulk Upload Section - Moved Above Predict Button -->
+                    <div class="bulk-upload-section">
+                        <div class="upload-card-enhanced">
+                            <div class="upload-header">
+                                <div class="upload-icon-large">
+                                    <i class="fas fa-file-csv"></i>
+                                </div>
+                                <div class="upload-text">
+                                    <h3>Bulk Property Analysis</h3>
+                                    <p>Upload a CSV file to predict prices for multiple properties at once</p>
+                                </div>
+                            </div>
+                            
+                            <div class="upload-area" id="upload-area">
+                                <div class="upload-content">
+                                    <div class="upload-icon-circle">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <h4>Drag & Drop your CSV file here</h4>
+                                    <p>or click to browse files</p>
+                                    <label for="csv-upload" class="upload-btn-new">
+                                        <i class="fas fa-folder-open"></i>
+                                        Choose CSV File
+                                    </label>
+                                    <input type="file" id="csv-upload" name="file" accept=".csv" style="display:none">
+                                </div>
+                            </div>
+                            
+                            <div class="upload-actions" style="display: none;" id="upload-actions">
+                                <div class="file-info" id="file-info"></div>
+                                <div class="action-buttons">
+                                    <button type="button" id="csv-submit" class="btn-process">
+                                        <i class="fas fa-magic"></i>
+                                        <span>Analyze Properties</span>
+                                    </button>
+                                    <button type="button" id="csv-cancel" class="btn-cancel">
+                                        <i class="fas fa-times"></i>
+                                        <span>Remove File</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="upload-features">
+                                <div class="feature-item">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Fast Batch Processing</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-download"></i>
+                                    <span>Instant CSV Download</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>Detailed Analytics</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider-section">
+                        <div class="divider-line"></div>
+                        <div class="divider-text">OR</div>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <div class="btn-container">
+                        <button type="submit" class="btn-predict">
+                            <i class="fas fa-crystal-ball"></i>
+                            <span>Predict My Price</span>
+                            <div class="btn-ripple"></div>
+                        </button>
+                        <p class="predict-subtitle">Get instant AI-powered pricing for single property</p>
+                    </div>
+
+                    <div class="loading" id="loading">
+                        <div class="loading-animation">
+                            <div class="spinner-modern"></div>
+                            <div class="loading-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                        <h4>Analyzing your property...</h4>
+                        <p>Our AI is processing your data to provide the most accurate pricing estimate</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if final_result %}
+        <div class="result-card">
+            <div class="result-header">
+                <div class="result-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h3>🎉 Your Estimated Airbnb Price</h3>
+            </div>
+            <div class="price-display">
+                <span class="currency">$</span>
+                <span class="amount">{{ final_result }}</span>
+                <span class="period">per night</span>
+            </div>
+            {% if low_price and high_price and low_price != final_result %}
+            <div class="price-band">
+                <i class="fas fa-chart-bar"></i>
+                <strong>Confidence Range:</strong>
+                ${{ low_price }} – ${{ high_price }} (90% confidence interval)
+            </div>
+            {% endif %}
+
+            {% if explanations %}
+            <div class="feature-highlight explanation-section">
+                <div class="highlight-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="highlight-content">
+                    <h4>🧠 AI Analysis: Why this price?</h4>
+                    <div class="explain-grid">
+                        {% for e in explanations %}
+                        <div class="explain-item">
+                            <div class="explain-feature">{{ e.feature }}</div>
+                            <div class="explain-impact {% if e.impact >= 0 %}positive{% else %}negative{% endif %}">
+                                <i class="fas {% if e.impact >= 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
+                                {% if e.impact >= 0 %}+{% endif %} ${{ "%.2f"|format(e.impact) }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="result-actions">
+                <button type="button" class="btn-action" onclick="window.print()">
+                    <i class="fas fa-print"></i>
+                    Print Report
+                </button>
+                <button type="button" class="btn-action" onclick="shareResults()">
+                    <i class="fas fa-share"></i>
+                    Share Results
+                </button>
+                <button type="button" class="btn-action" onclick="resetForm()">
+                    <i class="fas fa-redo"></i>
+                    New Prediction
+                </button>
+            </div>
+        </div>
+        {% endif %}
+        </div> <!-- End main-content-wrapper -->
+    </div>
+
+    <script>
+    // ============= Enhanced Dark mode with smooth transitions =============
+    (function() {
+        const THEME_KEY = 'airbnb_theme';
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        } else if (saved === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        
+        const btn = document.getElementById('theme-toggle');
+        function refresh() {
+            const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const icon = btn.querySelector('i');
+            const text = btn.querySelector('span');
+            
+            if (dark) {
+                icon.className = 'fas fa-sun';
+                text.textContent = 'Light';
+                btn.setAttribute('aria-label', 'Switch to light mode');
+            } else {
+                icon.className = 'fas fa-moon';
+                text.textContent = 'Dark';
+                btn.setAttribute('aria-label', 'Switch to dark mode');
+            }
+        }
+        
+        refresh();
+        btn.addEventListener('click', () => {
+            const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const next = dark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem(THEME_KEY, next);
+            
+            // Add transition effect
+            btn.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                btn.style.transform = '';
+                refresh();
+            }, 300);
+        });
+    })();
+
+    // ============= Enhanced Form Progress Tracking =============
+    (function() {
+        const form = document.getElementById('prediction-form');
+        const progressFill = document.getElementById('form-progress');
+        const progressText = document.querySelector('.progress-text');
+        
+        function updateProgress() {
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            let completed = 0;
+            
+            inputs.forEach(input => {
+                if (input.value && input.value !== '') {
+                    completed++;
+                }
+            });
+            
+            const percentage = Math.round((completed / inputs.length) * 100);
+            progressFill.style.width = percentage + '%';
+            progressText.textContent = percentage + '% Complete';
+            
+            // Add visual feedback
+            if (percentage === 100) {
+                progressFill.style.background = 'linear-gradient(90deg, #10B981, #059669)';
+                progressText.style.color = '#10B981';
+                progressText.innerHTML = '<i class="fas fa-check"></i> Ready to Predict!';
+            } else {
+                progressFill.style.background = 'linear-gradient(90deg, var(--accent), var(--accent-2))';
+                progressText.style.color = 'var(--text-primary)';
+            }
+        }
+        
+        // Update progress on input changes
+        form.addEventListener('input', updateProgress);
+        form.addEventListener('change', updateProgress);
+        
+        // Initial progress update
+        setTimeout(updateProgress, 100);
+    })();
+
+    // ============= Enhanced Saved drafts with animations =============
+    (function() {
+        const DRAFT_KEY = 'airbnb_form_draft';
+        const banner = document.getElementById('draft-banner');
+        const draft = localStorage.getItem(DRAFT_KEY);
+        
+        if (draft) {
+            setTimeout(() => {
+                banner.classList.add('show');
+            }, 500);
+        }
+        
+        document.getElementById('load-draft').addEventListener('click', () => {
+            try {
+                const data = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+                let loadedCount = 0;
+                
+                Object.entries(data).forEach(([k, v]) => {
+                    const el = document.getElementById(k);
+                    if (el) {
+                        el.value = v;
+                        el.style.animation = 'highlight 0.6s ease-out';
+                        loadedCount++;
+                    }
+                });
+                
+                // Show success message
+                banner.innerHTML = `<i class="fas fa-check"></i> Successfully loaded ${loadedCount} saved values!`;
+                banner.style.background = 'linear-gradient(135deg, #10B981, #059669)';
+                
+                setTimeout(() => {
+                    banner.classList.remove('show');
+                }, 2000);
+                
+            } catch (e) {
+                console.error('Failed to load draft:', e);
+            }
+        });
+        
+        document.getElementById('discard-draft').addEventListener('click', () => {
+            localStorage.removeItem(DRAFT_KEY);
+            banner.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => {
+                banner.classList.remove('show');
+                banner.style.animation = '';
+            }, 300);
+        });
+        
+        // Auto-save form data
+        let saveTimeout;
+        document.getElementById('prediction-form').addEventListener('input', () => {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                const data = {};
+                document.querySelectorAll('#prediction-form input, #prediction-form select').forEach(el => {
+                    if (el.id && el.type !== 'file' && el.value) {
+                        data[el.id] = el.value;
+                    }
+                });
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+            }, 1000);
+        });
+    })();
+
+    // ============= Enhanced Interactive Map =============
+    (function() {
+        const map = L.map('map', {
+            zoomControl: true,
+            scrollWheelZoom: true,
+            doubleClickZoom: true,
+            touchZoom: true
+        }).setView([40.7128, -74.0060], 12);
+        
+        // Enhanced tile layer with better styling
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19, 
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        let marker = null;
+        const latEl = document.getElementById('lat');
+        const lngEl = document.getElementById('long');
+        
+        // Custom marker icon
+        const customIcon = L.divIcon({
+            html: '<i class="fas fa-map-marker-alt" style="color: var(--accent); font-size: 24px;"></i>',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            className: 'custom-div-icon'
+        });
+        
+        function setPin(lat, lng) {
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+                marker.bindPopup(`<strong>Your Property Location</strong><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`);
+            }
+            latEl.value = lat.toFixed(6);
+            lngEl.value = lng.toFixed(6);
+            
+            // Add bounce animation
+            if (marker._icon) {
+                marker._icon.style.animation = 'bounce 0.6s ease-out';
+            }
+        }
+        
+        map.on('click', (e) => {
+            setPin(e.latlng.lat, e.latlng.lng);
+        });
+        
+        [latEl, lngEl].forEach(el => {
+            el.addEventListener('change', () => {
+                const lat = parseFloat(latEl.value);
+                const lng = parseFloat(lngEl.value);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    map.setView([lat, lng], 14);
+                    setPin(lat, lng);
+                }
+            });
+        });
+        
+        // Initialize with default marker
+        setPin(40.7128, -74.0060);
+    })();
+
+    // ============= Enhanced CSV upload with improved UI =============
+    (function() {
+        const uploadArea = document.getElementById('upload-area');
+        const uploadActions = document.getElementById('upload-actions');
+        const fileInput = document.getElementById('csv-upload');
+        const fileInfo = document.getElementById('file-info');
+        const submitBtn = document.getElementById('csv-submit');
+        const cancelBtn = document.getElementById('csv-cancel');
+        
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
+        });
+        
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+        
+        function handleFileSelection(file) {
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                showNotification('Please select a valid CSV file', 'error');
+                return;
+            }
+            
+            const fileSize = (file.size / 1024).toFixed(1);
+            const fileSizeUnit = file.size > 1024 * 1024 ? 'MB' : 'KB';
+            const displaySize = file.size > 1024 * 1024 ? (file.size / (1024 * 1024)).toFixed(1) : fileSize;
+            
+            fileInfo.innerHTML = `
+                <div class="file-icon">
+                    <i class="fas fa-file-csv"></i>
+                </div>
+                <div class="file-details">
+                    <h5>${file.name}</h5>
+                    <p>${displaySize} ${fileSizeUnit} • Ready for processing</p>
+                </div>
+            `;
+            
+            uploadArea.style.display = 'none';
+            uploadActions.style.display = 'block';
+            
+            showNotification('CSV file loaded successfully!', 'success');
+        }
+        
+        cancelBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            uploadArea.style.display = 'block';
+            uploadActions.style.display = 'none';
+            showNotification('File removed', 'info');
+        });
+        
+        function processCsvUpload() {
+            const file = fileInput.files[0];
+            if (!file) { 
+                showNotification('Please select a CSV file first.', 'error'); 
+                return; 
+            }
+            
+            // Update button state
+            submitBtn.innerHTML = `
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Processing...</span>
+            `;
+            submitBtn.disabled = true;
+            
+            const fd = new FormData();
+            fd.append('file', file);
+            document.getElementById('loading').style.display = 'block';
+            
+            fetch('/predict-csv', { method: 'POST', body: fd })
+                .then(r => {
+                    if (!r.ok) throw new Error('Prediction failed.');
+                    return r.blob();
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; 
+                    a.download = 'airbnb_predictions.csv'; 
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    showNotification('Predictions downloaded successfully!', 'success');
+                    
+                    // Reset button state
+                    submitBtn.innerHTML = `
+                        <i class="fas fa-magic"></i>
+                        <span>Analyze Properties</span>
+                    `;
+                    submitBtn.disabled = false;
+                    
+                    // Reset upload area
+                    setTimeout(() => {
+                        cancelBtn.click();
+                    }, 2000);
+                })
+                .catch(err => {
+                    document.getElementById('loading').style.display = 'none';
+                    showNotification(`Error: ${err.message}`, 'error');
+                    
+                    // Reset button state
+                    submitBtn.innerHTML = `
+                        <i class="fas fa-magic"></i>
+                        <span>Analyze Properties</span>
+                    `;
+                    submitBtn.disabled = false;
+                });
+        }
+        
+        submitBtn.addEventListener('click', processCsvUpload);
+    })();
+
+    // ============= Enhanced City auto-fill with animations =============
+    document.getElementById('city').addEventListener('change', function() {
+        const coords = {
+            'NYC':     { lat: 40.7128, lng: -74.0060, name: 'New York City' },
+            'SF':      { lat: 37.7749, lng: -122.4194, name: 'San Francisco' },
+            'LA':      { lat: 34.0522, lng: -118.2437, name: 'Los Angeles' },
+            'Chicago': { lat: 41.8781, lng: -87.6298, name: 'Chicago' },
+            'Boston':  { lat: 42.3601, lng: -71.0589, name: 'Boston' },
+            'DC':      { lat: 38.9072, lng: -77.0369, name: 'Washington, D.C.' }
+        };
+        
+        const c = coords[this.value];
+        if (c) {
+            const latInput = document.getElementById('lat');
+            const lngInput = document.getElementById('long');
+            
+            // Animate coordinate changes
+            latInput.style.animation = 'pulse 0.4s ease-out';
+            lngInput.style.animation = 'pulse 0.4s ease-out';
+            
+            latInput.value = c.lat;
+            lngInput.value = c.lng;
+            
+            showNotification(`Coordinates updated for ${c.name}`, 'info');
+        }
+    });
+
+    // ============= Enhanced Form Validation and Feedback =============
+    (function() {
+        const form = document.getElementById('prediction-form');
+        
+        // Real-time validation
+        form.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('blur', validateField);
+            input.addEventListener('input', clearFieldError);
+        });
+        
+        function validateField(e) {
+            const field = e.target;
+            const value = field.value.trim();
+            
+            // Clear previous error
+            clearFieldError({ target: field });
+            
+            if (field.required && !value) {
+                showFieldError(field, 'This field is required');
+                return false;
+            }
+            
+            // Specific validations
+            if (field.type === 'number') {
+                const num = parseFloat(value);
+                const min = parseFloat(field.min);
+                const max = parseFloat(field.max);
+                
+                if (value && isNaN(num)) {
+                    showFieldError(field, 'Please enter a valid number');
+                    return false;
+                }
+                if (value && min !== undefined && num < min) {
+                    showFieldError(field, `Value must be at least ${min}`);
+                    return false;
+                }
+                if (value && max !== undefined && num > max) {
+                    showFieldError(field, `Value must be no more than ${max}`);
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        function showFieldError(field, message) {
+            field.classList.add('error');
+            let errorEl = field.parentNode.querySelector('.field-error');
+            if (!errorEl) {
+                errorEl = document.createElement('div');
+                errorEl.className = 'field-error';
+                field.parentNode.appendChild(errorEl);
+            }
+            errorEl.textContent = message;
+            errorEl.style.animation = 'slideDown 0.3s ease-out';
+        }
+        
+        function clearFieldError(e) {
+            const field = e.target;
+            field.classList.remove('error');
+            const errorEl = field.parentNode.querySelector('.field-error');
+            if (errorEl) {
+                errorEl.remove();
+            }
+        }
+        
+        // Attach validation functions to global scope for use in other functions
+        window.validateField = validateField;
+    })();
+
+    // ============= Enhanced Submit Handler =============
+    document.getElementById('prediction-form').addEventListener('submit', function(e) {
+        if (e.submitter && e.submitter.id === 'csv-submit') return;
+        
+        // Validate all fields
+        let isValid = true;
+        this.querySelectorAll('input[required], select[required]').forEach(field => {
+            if (!validateField({ target: field })) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            showNotification('Please fix the errors in the form before submitting.', 'error');
+            return;
+        }
+        
+        document.getElementById('loading').style.display = 'block';
+        const btn = document.querySelector('.btn-predict');
+        const icon = btn.querySelector('i');
+        const text = btn.querySelector('span');
+        
+        btn.disabled = true;
+        icon.className = 'fas fa-spinner fa-spin';
+        text.textContent = 'Analyzing...';
+        
+        // Add ripple effect
+        const ripple = btn.querySelector('.btn-ripple');
+        ripple.style.animation = 'ripple 0.6s linear infinite';
+    });
+
+    // ============= Utility Functions =============
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 4000);
+    }
+
+    function shareResults() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Airbnb Price Prediction Results',
+                text: `My property is estimated at $${document.querySelector('.amount').textContent} per night!`,
+                url: window.location.href
+            });
+        } else {
+            // Fallback to copying to clipboard
+            const resultText = `My Airbnb property price estimate: $${document.querySelector('.amount').textContent} per night. Get your estimate at ${window.location.href}`;
+            navigator.clipboard.writeText(resultText).then(() => {
+                showNotification('Results copied to clipboard!', 'success');
+            });
+        }
+    }
+
+    function resetForm() {
+        if (confirm('Are you sure you want to reset the form? All entered data will be lost.')) {
+            document.getElementById('prediction-form').reset();
+            document.querySelector('.progress-fill').style.width = '0%';
+            document.querySelector('.progress-text').textContent = '0% Complete';
+            showNotification('Form has been reset', 'info');
+        }
+    }
+
+    // ============= Auto-scroll to results =============
+    {% if final_result %}
+    setTimeout(() => {
+        const card = document.querySelector('.result-card');
+        if (card) {
+            card.scrollIntoView({behavior: 'smooth', block: 'center'});
+            card.style.animation = 'resultAppear 0.8s ease-out';
+        }
+    }, 100);
+    {% endif %}
+
+    // ============= Initialize animations on page load =============
+    window.addEventListener('load', () => {
+        // Animate form sections on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.6s ease-out';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.form-section').forEach(section => {
+            observer.observe(section);
+        });
+    });
+    </script>
+</body>
+</html>
